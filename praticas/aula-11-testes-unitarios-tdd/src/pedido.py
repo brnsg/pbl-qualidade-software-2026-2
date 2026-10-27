@@ -30,16 +30,23 @@ def calcular_total(itens: list[dict]) -> float:
 
 # EXERCICIO:
 # Implemente com TDD a funcao descrita abaixo.
-#
-# def calcular_taxa_entrega(distancia_km, total_pedido):
-#     """Calcula a taxa de entrega.
-#
-#     Regras obrigatorias:
-#     - ate 3 km, a taxa e R$ 5;
-#     - acima de 3 km, acrescentar R$ 2 por quilometro excedente;
-#     - pedidos a partir de R$ 100 possuem entrega gratuita.
-#
-#     Desafio opcional:
-#     - distancia negativa deve gerar ValueError.
-#     """
-#     pass
+
+
+def calcular_taxa_entrega(distancia_km: float, total_pedido: float) -> float:
+    """Calcula a taxa de entrega.
+
+    Regras obrigatorias:
+    - ate 3 km, a taxa e R$ 5;
+    - acima de 3 km, acrescentar R$ 2 por quilometro excedente;
+    - pedidos a partir de R$ 100 possuem entrega gratuita.
+
+    Desafio opcional:
+    - distancia negativa deve gerar ValueError.
+    """
+    if total_pedido >= 100:
+        return 0
+
+    if distancia_km <= 3:
+        return 5
+
+    return 5 + (distancia_km - 3) * 2
