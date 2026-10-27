@@ -1,0 +1,15 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\brian\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\brian\Documents\antigravity\modest-planck
+collecting ... collected 7 items
+
+tests/test_pedido.py::test_calcula_total_de_varios_itens PASSED          [ 14%]
+tests/test_pedido.py::test_retorna_zero_quando_lista_esta_vazia PASSED   [ 28%]
+tests/test_pedido.py::test_rejeita_item_com_preco_zero PASSED            [ 42%]
+tests/test_pedido.py::test_rejeita_item_com_quantidade_zero PASSED       [ 57%]
+tests/test_pedido.py::test_taxa_entrega_ate_3km PASSED                   [ 71%]
+tests/test_pedido.py::test_taxa_entrega_acima_de_3km PASSED              [ 85%]
+tests/test_pedido.py::test_taxa_entrega_gratuita_para_pedido_a_partir_de_100 PASSED [100%]
+
+============================== 7 passed in 0.03s ==============================
