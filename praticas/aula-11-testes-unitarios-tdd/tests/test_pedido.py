@@ -1,6 +1,6 @@
 import pytest
 
-from src.pedido import calcular_total
+from src.pedido import calcular_taxa_entrega, calcular_total
 
 
 def test_calcula_total_de_varios_itens():
@@ -40,3 +40,21 @@ def test_rejeita_item_com_quantidade_zero():
 
     with pytest.raises(ValueError, match="quantidade"):
         calcular_total(itens)
+
+
+def test_taxa_entrega_ate_3km():
+    taxa = calcular_taxa_entrega(2, 50)
+
+    assert taxa == 5
+
+
+def test_taxa_entrega_acima_de_3km():
+    taxa = calcular_taxa_entrega(4, 50)
+
+    assert taxa == 7
+
+
+def test_taxa_entrega_gratuita_para_pedido_a_partir_de_100():
+    taxa = calcular_taxa_entrega(5, 100)
+
+    assert taxa == 0
