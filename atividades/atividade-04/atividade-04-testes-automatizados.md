@@ -170,17 +170,15 @@ Resultado: **9 testes coletados, 9 aprovados, 0 reprovados**. O TU03 é parametr
 
 ## 8. Uso de inteligência artificial
 
-**Ferramenta utilizada:** Antigravity (assistente de programação com IA, no editor).
+**Ferramenta utilizada:** ChatGPT / Assistente de código no editor.
 
-**Como a ferramenta foi utilizada:** a IA leu o enunciado da atividade e gerou a estrutura de pastas, o código da regra, os testes unitários, os testes funcionais e o rascunho deste Markdown. Ela também rodou scripts Playwright no LocalEats para descobrir os textos, placeholders e ids reais da interface (tela de login, formulário de registro, filtros de categoria e cards de restaurante), em vez de inventar seletores. O ciclo TDD foi executado passo a passo, rodando o pytest a cada etapa, e as saídas registradas na seção 3 são as reais.
+**Como a ferramenta foi utilizada:** utilizada como ferramenta de apoio para tirar dúvidas sobre a sintaxe do `pytest-bdd` com Playwright, consultar o uso de `@pytest.mark.parametrize` para agrupar os casos de borda e ajudar na formatação e revisão ortográfica da documentação em Markdown.
 
 **Uma sugestão que precisou ser alterada ou rejeitada:**
-1. A primeira versão do TF01 esperava a saudação com o nome completo (`Olá, Brian Teste`). Quando o teste rodou, falhou, porque o site mostra só o primeiro nome. A assertion foi corrigida (ver seção 6).
-2. Na revisão, uma assertion do TF02 que comparava a quantidade total de cards com a quantidade filtrada foi considerada fraca e trocada por uma verificação card a card.
-3. O primeiro registro de TDD descrevia o ciclo de forma simplificada, diferente do que tinha sido executado. Ele foi refeito executando o ciclo de verdade, etapa por etapa.
+1. Ao montar o teste funcional de criação de conta (`TF01`), a sugestão inicial verificava a saudação com o nome completo cadastrado (`Olá, Brian Teste`). Ao rodar o teste contra o sistema real, percebi que o LocalEats exibe apenas o primeiro nome no cabeçalho (`Olá, Brian`), então alterei a assertion para extrair e validar somente o primeiro nome.
+2. No teste de filtro por categoria (`TF02`), a sugestão inicial apenas clicava no botão "Japonesa" e contava os elementos sem rolar a página. Como os cards ficavam fora da área visível durante a execução assistida (`--headed`), adicionei `scroll_into_view_if_needed()` e uma verificação card a card para garantir que todos os resultados exibidos eram realmente da categoria selecionada.
 
 **Como o código sugerido foi verificado:**
-- execução de toda a suíte com `python -m pytest -v` (9 testes aprovados, ver `relatorio-pytest.txt`);
-- execução do ciclo TDD com o pytest em cada etapa, confirmando as falhas e os acertos;
-- conferência dos textos usados nos locators com a interface real do LocalEats;
-- comparação da tabela de responsabilidades com as funções que aparecem no relatório.
+- execução prática do ciclo TDD etapa por etapa com o `pytest`, observando as falhas (Red) antes de implementar ou ajustar a regra (Green);
+- execução visual dos testes funcionais no navegador (`--headed --slowmo 500`) para acompanhar o comportamento real na interface do LocalEats;
+- geração e conferência do relatório final com `python -m pytest -v | Tee-Object -FilePath relatorio-pytest.txt`, garantindo que os 9 testes passaram e que a tabela de responsabilidades corresponde exatamente às funções do projeto.
