@@ -121,7 +121,7 @@ Funcionalidade: Filtrar restaurantes por categoria
     E nenhum restaurante da categoria "Italiana" deve ser exibido
 ```
 
-Os passos são implementados com `pytest-bdd` em `tests/test_bdd_categoria.py`. Assertions: o botão "Japonesa" fica com a classe `active`; o primeiro card passa a conter "Japonesa"; a lista não está vazia e cada card exibido contém "Japonesa"; nenhum card contém "Italiana".
+Os passos são implementados com `pytest-bdd` em `tests/test_bdd_categoria.py`. Assertions: o botão "Japonesa" fica com a classe `active`; o primeiro card passa a conter "Japonesa"; a página rola até os restaurantes e o primeiro card fica visível na tela; a lista não está vazia e cada card exibido contém "Japonesa"; nenhum card contém "Italiana".
 
 ---
 

@@ -37,6 +37,9 @@ def restaurantes_da_categoria(page: Page, categoria):
     cards = page.locator(".rest-card")
     # O primeiro card passa a ser da categoria escolhida (aguarda a atualização da lista)
     expect(cards.first).to_contain_text(categoria)
+    # Rola a página até os restaurantes filtrados, como um usuário faria para vê-los
+    cards.first.scroll_into_view_if_needed()
+    expect(cards.first).to_be_in_viewport()
     # A lista não está vazia e cada card exibido pertence à categoria
     assert cards.count() > 0
     for card in cards.all():
