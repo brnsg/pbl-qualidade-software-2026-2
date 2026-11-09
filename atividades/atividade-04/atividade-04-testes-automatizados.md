@@ -57,17 +57,33 @@ python -m pytest -v | Tee-Object -FilePath relatorio-pytest.txt
 
 ### TDD de Brian da Silva Guterres
 
-**Regra escolhida:** Regra 1 — verificar valor mínimo do pedido (`pedido_atingiu_valor_minimo(valor_pedido)`): pedidos de R$ 30,00 ou mais retornam `True`; abaixo de R$ 30,00 retornam `False`; valores negativos geram `ValueError`.
+**Regra escolhida:** Regra 1, verificar valor mínimo do pedido (`pedido_atingiu_valor_minimo(valor_pedido)`). Pedidos de R$ 30,00 ou mais retornam `True`; abaixo de R$ 30,00 retornam `False`; valores negativos geram `ValueError`.
 
-**Primeiro teste escrito:** `test_pedido_acima_do_minimo_retorna_true` — verifica que `pedido_atingiu_valor_minimo(50)` retorna `True`.
+**Primeiro teste escrito:** `test_pedido_acima_do_minimo_retorna_true`, que verifica se `pedido_atingiu_valor_minimo(50)` retorna `True`.
 
-**Por que o teste falhou inicialmente:** o módulo `src/regras_localeats.py` e a função ainda não existiam. O pytest falhou na coleta com `ModuleNotFoundError: No module named 'src.regras_localeats'` (fase Red).
+**Por que o teste falhou inicialmente:** a função ainda não existia no arquivo `src/regras_localeats.py`, então o pytest nem conseguiu importar o teste:
 
-**Implementação mínima realizada:** criação do arquivo `src/regras_localeats.py` com a função `pedido_atingiu_valor_minimo` retornando a comparação `valor_pedido >= VALOR_MINIMO_PEDIDO`, o suficiente para o primeiro teste passar (fase Green).
+```
+E   ImportError: cannot import name 'pedido_atingiu_valor_minimo' from 'src.regras_localeats'
+1 error in 0.18s
+```
 
-**Segundo teste escrito:** `test_pedido_abaixo_do_minimo_retorna_false`, que verifica que `pedido_atingiu_valor_minimo(20)` retorna `False`. Também foram escritos o teste de limite (`30` deve retornar `True` e `29.99` deve retornar `False`) e o teste de valor negativo com `pytest.raises(ValueError)`, que exige a validação `if valor_pedido < 0: raise ValueError(...)`.
+**Implementação mínima realizada:** só o necessário para esse teste passar, que é retornar sempre `True`:
 
-**Melhoria ou refatoração realizada:** o valor `30` fica na constante `VALOR_MINIMO_PEDIDO = 30.00` (evita número mágico), a função tem uma docstring explicando a regra e os casos de borda foram agrupados em um único teste com `@pytest.mark.parametrize`, evitando testes duplicados.
+```python
+def pedido_atingiu_valor_minimo(valor_pedido):
+    return True
+```
+
+Resultado: `1 passed`.
+
+**Segundo teste escrito:** `test_pedido_abaixo_do_minimo_retorna_false`, que verifica se `pedido_atingiu_valor_minimo(20)` retorna `False`. Com a implementação anterior ele falhou (`assert True is False`, `1 failed, 1 passed`), mostrando que o `return True` não bastava. A implementação foi ajustada para `return valor_pedido >= 30` e os dois testes passaram (`2 passed`).
+
+Depois disso:
+- o teste de limite com `@pytest.mark.parametrize` (30, 30.00, 29.99 e 0) passou de primeira (`6 passed`), confirmando que o `>=` já tratava corretamente o valor exato de R$ 30,00;
+- o teste de valor negativo com `pytest.raises` falhou (`Failed: DID NOT RAISE ValueError`). Para ele passar, foi adicionada a validação `if valor_pedido < 0: raise ValueError(...)` (`7 passed`).
+
+**Melhoria ou refatoração realizada:** o número `30` foi trocado pela constante `VALOR_MINIMO_PEDIDO = 30.00`, que deixa claro o que o valor significa. Também foram adicionadas uma docstring explicando a regra e a identificação do responsável e do ID (TU01–TU04) em cada teste. Os testes continuaram passando (`7 passed`).
 
 ---
 
@@ -111,9 +127,19 @@ Os passos são implementados com `pytest-bdd` em `tests/test_bdd_categoria.py`. 
 
 ## 5. Explicação individual (Brian da Silva Guterres) — TF01
 
-O teste `test_criar_conta_redireciona_para_pagina_inicial_com_saudacao` valida o fluxo de criação de conta de ponta a ponta pela interface. Ele usa a fixture `page` do `pytest-playwright` para abrir o navegador e a fixture `novo_usuario` para gerar um e-mail único com `time.time_ns()`. Sem isso, a segunda execução falharia porque o e-mail já estaria cadastrado, ou seja, o teste dependeria de execuções anteriores.
+Escolhi explicar o TF01, `test_criar_conta_redireciona_para_pagina_inicial_com_saudacao`, porque ele testa um fluxo completo, do jeito que um usuário faria.
 
-Os elementos são localizados com locators orientados ao usuário: `get_by_role("button", name="Criar Conta")` e `get_by_placeholder(...)`. Esses locators são mais estáveis que seletores CSS baseados em layout. Depois do clique em **Registrar**, as assertions `expect(page).to_have_url(...)` e `expect(locator).to_contain_text(...)` esperam automaticamente até 5 segundos pelo resultado. Por isso não é necessário usar `time.sleep`, e o teste verifica resultados que o usuário realmente vê: a mudança de página, a saudação com o nome e a lista de restaurantes.
+**O que o teste faz:**
+1. Abre o LocalEats. Como não há ninguém logado, o site mostra a tela de login, e o teste confere que o título da aba é `Entrar | Local Eats`.
+2. Clica na aba **Criar Conta**, preenche nome, e-mail e senha e clica em **Registrar**.
+3. Verifica se o cadastro funcionou olhando o que aparece na tela: a URL muda para `index.html`, aparece "Olá, Brian" no canto da página, aparece o título "Descubra sabores incríveis na sua cidade" e a lista de restaurantes é exibida.
+
+**Por que foi feito assim:**
+- **E-mail diferente a cada execução:** a fixture `novo_usuario`, em `conftest.py`, gera o e-mail com `time.time_ns()`. Se o e-mail fosse fixo, o teste passaria só na primeira vez, porque na segunda o e-mail já estaria cadastrado. Assim cada execução é independente.
+- **Locators pelo que o usuário vê:** usei `get_by_role("button", name="Criar Conta")` e `get_by_placeholder("Seu nome")` em vez de seletores CSS complicados. Se o layout mudar mas o botão continuar com o mesmo nome, o teste continua funcionando.
+- **Sem `time.sleep`:** o `expect(...)` do Playwright espera sozinho, até 5 segundos, o resultado aparecer. Se aparecer antes, o teste segue na hora. Com `sleep`, o teste ficaria mais lento ou poderia falhar quando o site demorasse.
+
+**Algo que aprendi com esse teste:** na primeira execução ele falhou, porque eu esperava "Olá, Brian Teste" e o site mostra só o primeiro nome ("Olá, Brian"). O problema não era o sistema, era a minha expectativa (ver seção 6).
 
 ---
 
@@ -144,10 +170,17 @@ Resultado: **9 testes coletados, 9 aprovados, 0 reprovados**. O TU03 é parametr
 
 ## 8. Uso de inteligência artificial
 
-**Ferramenta utilizada:** Antigravity (assistente de programação com IA).
+**Ferramenta utilizada:** Antigravity (assistente de programação com IA, no editor).
 
-**Como a ferramenta foi utilizada:** apoio para organizar a estrutura de pastas, escrever o rascunho dos testes unitários, explorar a interface do LocalEats com scripts Playwright (para descobrir textos, placeholders e ids reais) e escrever os passos do pytest-bdd.
+**Como a ferramenta foi utilizada:** a IA leu o enunciado da atividade e gerou a estrutura de pastas, o código da regra, os testes unitários, os testes funcionais e o rascunho deste Markdown. Ela também rodou scripts Playwright no LocalEats para descobrir os textos, placeholders e ids reais da interface (tela de login, formulário de registro, filtros de categoria e cards de restaurante), em vez de inventar seletores. O ciclo TDD foi executado passo a passo, rodando o pytest a cada etapa, e as saídas registradas na seção 3 são as reais.
 
-**Uma sugestão que precisou ser alterada ou rejeitada:** a primeira versão do TF01 gerada pela IA esperava a saudação com o nome completo (`Olá, Brian Teste`). A execução mostrou que o sistema exibe só o primeiro nome, e a assertion foi alterada. Na revisão, uma assertion do TF02 que comparava a contagem total de cards com a contagem filtrada também foi substituída por uma verificação card a card, que é mais clara.
+**Uma sugestão que precisou ser alterada ou rejeitada:**
+1. A primeira versão do TF01 esperava a saudação com o nome completo (`Olá, Brian Teste`). Quando o teste rodou, falhou, porque o site mostra só o primeiro nome. A assertion foi corrigida (ver seção 6).
+2. Na revisão, uma assertion do TF02 que comparava a quantidade total de cards com a quantidade filtrada foi considerada fraca e trocada por uma verificação card a card.
+3. O primeiro registro de TDD descrevia o ciclo de forma simplificada, diferente do que tinha sido executado. Ele foi refeito executando o ciclo de verdade, etapa por etapa.
 
-**Como o código sugerido foi verificado:** executando os testes unitários antes da implementação (falha confirmada), executando toda a suíte com `python -m pytest -v`, conferindo no site os textos usados nos locators e comparando a tabela de responsabilidades com as funções presentes no relatório.
+**Como o código sugerido foi verificado:**
+- execução de toda a suíte com `python -m pytest -v` (9 testes aprovados, ver `relatorio-pytest.txt`);
+- execução do ciclo TDD com o pytest em cada etapa, confirmando as falhas e os acertos;
+- conferência dos textos usados nos locators com a interface real do LocalEats;
+- comparação da tabela de responsabilidades com as funções que aparecem no relatório.
