@@ -30,12 +30,22 @@ atividade-04/
 
 ### Como executar
 
+No terminal (PowerShell), a partir da raiz do repositório clonado:
+
 ```powershell
+cd atividades/atividade-04
 python -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python -m playwright install chromium
 python -m pytest -v | Tee-Object -FilePath relatorio-pytest.txt
+```
+
+Para assistir aos testes funcionais executando no navegador:
+
+```powershell
+python -m pytest -v --headed --slowmo 500
 ```
 
 ---
